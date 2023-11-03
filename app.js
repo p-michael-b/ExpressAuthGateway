@@ -44,7 +44,7 @@ app.use(cors({credentials: true, origin: true}))
 app.use(helmet());
 
 //Importing the environment variables and making sure they are all available
-const requiredEnvVars = ['JWT_SECRET', 'COOKIE_SECRET', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_PORT', 'SERVER_PORT', 'PRODUCTION_ROOT'];
+const requiredEnvVars = ['JWT_SECRET', 'COOKIE_SECRET', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_PORT', 'SERVER_PORT', 'PRODUCTION_MAIL', 'PRODUCTION_CLIENT'];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
         console.error(`Missing required environment variable: ${envVar}`);
@@ -54,6 +54,7 @@ for (const envVar of requiredEnvVars) {
 
 // Load the Knex configuration from the 'knexfile.js' file based on the current environment.
 const knexConfig = require('./knexfile.js')[process.env.NODE_ENV];
+console.log(knexConfig)
 
 // Initialize a Knex instance using the loaded configuration for database operations.
 const knex = require('knex')(knexConfig);
@@ -65,6 +66,7 @@ const store = new knexSessionStore({knex: knex,});
 const oneDay = 1000 * 60 * 60 * 24;
 
 // Set up session middleware with the defined session store and configuration options.
+// The secure option depends on SSL settings and cannot be set in current digital ocean setup
 app.use(session({
     store: store,
     name: 'session',
@@ -72,9 +74,11 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
+        domain:'.ondigitalocean.app',
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: oneDay
+        secure: true,
+        maxAge: oneDay,
+        sameSite: 'none'
     }
 }));
 
@@ -132,8 +136,11 @@ app.get('/', (req, res) => {
     return res.status(200).json({
         success: true,
         message: 'The auth gateway',
+        data:[]
     });
 })
+
+
 
 // Starting the server and listening on the specified port, logging the listening status.
 server.listen(PORT, () => console.log(`server listening on port ${PORT}`));
