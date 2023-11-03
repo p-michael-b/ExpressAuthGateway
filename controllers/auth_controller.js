@@ -10,9 +10,6 @@ const mailService = require('../services/mail_service');
 // Import the Passport library for client-side authentication and authorization.
 const passport = require("passport");
 
-// Import JWT library for server-side authentication and authorization.
-const jwt = require("jsonwebtoken");
-
 // Import the bcrypt library for password hashing and comparison.
 const bcrypt = require("bcrypt");
 
@@ -30,8 +27,7 @@ const login = async (req, res, next) => {
         }
         req.login(authenticatedUser, async (error) => {
             if (error) return next(error)
-
-            req.session.token = jwt.sign({userId: authenticatedUser.id}, process.env.JWT_SECRET, {expiresIn: '1h'});
+            
             return res.status(200).json({
                 success: true,
                 message: 'Login successful',
