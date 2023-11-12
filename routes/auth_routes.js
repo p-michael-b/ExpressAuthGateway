@@ -44,8 +44,8 @@ router.post('/password', authController.password);
 router.post('/operator', isAuthenticated, authController.operator);
 
 //probe operator endpoint for probing availability of new operator name.
-//This must be a protected route
-router.post('/probe', isAuthenticated, authController.probe);
+//This cannot be a protected route because invited user isn't authenticated yet
+router.post('/probe', authController.probe);
 
 //invite friend endpoint for sending invitation email.
 //This must be a protected route
