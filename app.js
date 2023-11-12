@@ -1,5 +1,12 @@
 // Load environment variables from a .env file
-require('dotenv').config();
+const dotenv = require('dotenv');
+
+// Set NODE_ENV to 'development' by default
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Load environment variables based on NODE_ENV
+const envFile = `.env_${process.env.NODE_ENV}`;
+dotenv.config({ path: envFile });
 
 // Import the Express.js framework
 const express = require('express');
@@ -43,8 +50,9 @@ app.use(cors({credentials: true, origin: true}))
 // Enhancing security by applying Helmet middleware for HTTP header protection.
 app.use(helmet());
 
+
 //Importing the environment variables and making sure they are all available
-const requiredEnvVars = ['JWT_SECRET', 'COOKIE_SECRET', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_PORT', 'SERVER_PORT', 'PRODUCTION_MAIL', 'PRODUCTION_CLIENT'];
+const requiredEnvVars = ['JWT_SECRET', 'COOKIE_SECRET', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'DB_PORT', 'SERVER_PORT', 'PRODUCTION_MAIL', 'PRODUCTION_CLIENT', 'AUTH_SCHEMA'];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
         console.error(`Missing required environment variable: ${envVar}`);
@@ -54,6 +62,7 @@ for (const envVar of requiredEnvVars) {
 
 // Load the Knex configuration from the 'knexfile.js' file based on the current environment.
 const knexConfig = require('./knexfile.js')[process.env.NODE_ENV];
+
 console.log(knexConfig)
 
 // Initialize a Knex instance using the loaded configuration for database operations.
@@ -74,11 +83,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        domain:'.ondigitalocean.app',
         httpOnly: true,
-        secure: true,
-        maxAge: oneDay,
-        sameSite: 'none'
+        secure: process.env.COOKIE_SECRET === 'production',
+        maxAge: oneDay
     }
 }));
 
