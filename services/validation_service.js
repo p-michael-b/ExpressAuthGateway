@@ -165,14 +165,14 @@ const validateOperator = (operator) => {
  * @param {string} operator - The operator's email to be validated.
  * @returns {boolean} - `true` if the operator's name passes all validations, `false` otherwise.
  */
-const validateEmail = (operator) => {
+const validateEmail = async (operator) => {
     const validators = [
         validEmail
     ]
     let errors = {};
     // run each validator function on the value
     for (let validator of validators) {
-        let result = validator(operator);
+        let result = await validator(operator);
         // if the validation fails, add an error message to the errors object
         if (!result.valid) {
             errors[0] = errors[0] || [];
