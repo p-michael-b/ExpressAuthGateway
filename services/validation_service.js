@@ -1,3 +1,6 @@
+//import deep email validator for validating email addresses
+const { validate } = require('deep-email-validator');
+
 /**
  * Check if the provided value contains at least one lowercase letter.
  * @param {string} value - The value to be checked.
@@ -93,6 +96,20 @@ const atMostTwentyCharactersOperator = (value) => ({
 });
 
 /**
+ * Check if the provided value is a valid email address.
+ * @param {string} value - The value to be checked.
+ * @returns {Object} - An object with 'valid' indicating if the condition is met and a corresponding 'message'.
+ */
+const validEmail = async (value) => {
+    let result = {};
+    const validation = await validate(value);
+    result.valid= validation.valid;
+    result.message= validation.reason;
+    return result;
+};
+
+
+/**
  * Validate a password based on a set of validation functions.
  * @param {string} password - The password to be validated.
  * @returns {boolean} - `true` if the password passes all validations, `false` otherwise.
@@ -142,75 +159,6 @@ const validateOperator = (operator) => {
     }
     return Object.keys(errors).length === 0
 }
-
-// Validates an email address to ensure it meets standard email format requirements.
-const isValidEmail = (email) => {
-    // Check if the email string is empty or undefined
-    if (!email) {
-        return false;
-    }
-
-    // Check that the email contains a "@" symbol
-    if (!email.includes("@")) {
-        return false;
-    }
-
-    // Split the email into local and domain parts
-    const parts = email.split("@");
-    const localPart = parts[0];
-    const domainPart = parts[1];
-
-    // Check that the local part is not empty
-    if (localPart.length === 0) {
-        return false;
-    }
-
-    // Check that the domain part contains a dot
-    if (!domainPart.includes(".")) {
-        return false;
-    }
-
-    // Check that the domain part has at least two characters after the dot
-    const domainParts = domainPart.split(".");
-    const tld = domainParts[domainParts.length - 1];
-    if (tld.length < 2) {
-        return false;
-    }
-
-    // Check that the domain part does not have consecutive dots
-    if (domainPart.includes("..")) {
-        return false;
-    }
-
-    // Check that the domain part does not start or end with a hyphen
-    if (domainPart.startsWith("-") || domainPart.endsWith("-")) {
-        return false;
-    }
-
-    // Check that the local and domain parts do not contain invalid characters
-    const localPartPattern = /^[a-zA-Z0-9!#$%&'*+/=?^_`{|}~.-]+$/;
-    if (!localPartPattern.test(localPart)) {
-        return false;
-    }
-    const domainPartPattern = /^[a-zA-Z0-9.-]+$/;
-    if (!domainPartPattern.test(domainPart)) {
-        return false;
-    }
-
-    // If all checks pass, the email is valid
-    return true;
-};
-
-/**
- * Check if the provided value is a valid email address.
- * @param {string} value - The value to be checked.
- * @returns {Object} - An object with 'valid' indicating if the condition is met and a corresponding 'message'.
- */
-const validEmail = (value) => ({
-    valid: isValidEmail(value),
-    message: `That doesn't seem to be right.`,
-});
-
 
 /**
  * Validate an operator's email based on a set of validation functions.
